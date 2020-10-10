@@ -1,0 +1,5 @@
+# 只有域名：执行dns解析
+# 完整的url： 执行curl
+resolve:
+  - apidev.laohu.com
+  - https://apidev.laohu.com

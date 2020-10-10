@@ -1,0 +1,24 @@
+modeYum:
+  - action: "install"
+    name:
+    - ethtool
+    - tcpdump
+
+modeMysql:
+  - action: "install"
+    role: "master"
+    host: "game3"
+
+modeScripts:
+  - action: "run"
+    env: "python"
+    name:
+    - ./tools/sayhello.py
+  - action: "run"
+    env : "shell"
+    name:
+    - ./tools/kill.sh
+  - action: "run"
+    env: "golang"
+    name:
+      - ./tools/doubles
