@@ -17,9 +17,13 @@ import (
 )
 
 var (
-	doYaml = kingpin.Flag("yaml", "only do yaml action，default is only do basic check[sys,cpu,disk ...]").Bool()
-	doAll  = kingpin.Flag("all", "do basic check and yaml action").Bool()
-	doHelp = kingpin.Flag("usage", "The explanation of the config of this tool").Bool()
+	doYaml    = kingpin.Flag("yaml", "only do yaml action，default is only do basic check[sys,cpu,disk ...]").Bool()
+	doAll     = kingpin.Flag("all", "do basic check and yaml action").Bool()
+	doHelp    = kingpin.Flag("usage", "The explanation of the config of this tool").Bool()
+	doVersion = kingpin.Flag("version", "show the version of the tools").Bool()
+)
+var (
+	version = "1.0.0"
 )
 
 func usage() {
@@ -35,6 +39,11 @@ func usage() {
 	fmt.Println(">>dns.yaml: ")
 	fmt.Println("  >1.https的完整url，执行https GET")
 	fmt.Println("  >2.域名，执行域名解析")
+}
+
+// 显示版本信息
+func showVersion() {
+	fmt.Println(version)
 }
 
 // 显示系统信息
@@ -227,7 +236,7 @@ func doYamlAction() {
 }
 func main() {
 	kingpin.Parse()
-	if !*doYaml && !*doAll && !*doHelp {
+	if !*doYaml && !*doAll && !*doHelp && !*doVersion {
 		showSystem()
 		showCpu()
 		showTimeZone()
@@ -257,5 +266,8 @@ func main() {
 	}
 	if *doHelp {
 		usage()
+	}
+	if *doVersion {
+		showVersion()
 	}
 }
