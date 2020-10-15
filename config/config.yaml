@@ -4,10 +4,15 @@ modeYum:
     - ethtool
     - tcpdump
 
-modeMysql:
-  - action: "install"
-    role: "master"
-    host: "game3"
+modeDir:
+  - action: "chown"
+    para: "mhxzx.mhxzx"
+    path:
+    - /export/web
+  - ation: "chmod"
+    perm: 0600
+    path:
+    - /export/web
 
 modeScripts:
   - action: "run"

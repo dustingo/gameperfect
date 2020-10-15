@@ -4,31 +4,27 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 )
 
 // 解析yaml配置文件
 
 type YamlConfig struct {
-	//ModeDisk    []ModeDiskItem `yaml:"modeDisk"`
 	ModeYum     []YumMode     `yaml:"modeYum"`
-	ModeMysql   []MysqlMode   `yaml:"modeMysql"`
+	ModeDir     []DirMode     `yaml:"modeDir"`
 	ModeScripts []ScriptsMode `yaml:"modeScripts"`
 }
-
-//type ModeDiskItem struct {
-//	Action string   `yaml:"action"`
-//	Name   []string `yaml:"name"`
-//}
 
 type YumMode struct {
 	Action string   `yaml:"action"`
 	Name   []string `yaml:"name"`
 }
 
-type MysqlMode struct {
-	Action string `yaml:"action"`
-	Role   string `yaml:"role"`
-	Host   string `yaml:"host"`
+type DirMode struct {
+	Action string      `yaml:"action"`
+	Para   string      `yaml:"para"`
+	Path   []string    `yaml:"path"`
+	Perm   os.FileMode `yaml:"perm"`
 }
 
 type ScriptsMode struct {
@@ -37,6 +33,7 @@ type ScriptsMode struct {
 	Name   []string `yaml:"name"`
 }
 
+// ParseYaml 解析config.yaml
 func ParseYaml() *YamlConfig {
 	ymlConfig := new(YamlConfig)
 	yamlByte, err := ioutil.ReadFile("./config/config.yaml")
@@ -53,7 +50,5 @@ func ParseYaml() *YamlConfig {
 		fmt.Println(err)
 		return nil
 	}
-
 	return ymlConfig
-
 }

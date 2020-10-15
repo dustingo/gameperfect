@@ -53,12 +53,11 @@ func asyncPrint(reader io.ReadCloser) {
 // Execute 调用shell
 func Execute(name string, arg ...string) error {
 	cmd := exec.Command(name, arg...)
-
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 
 	if err := cmd.Start(); err != nil {
-		fmt.Printf("Error starting command: %s......", err.Error())
+		fmt.Printf("Error starting command: %s......\n", err.Error())
 		return err
 	}
 	sg.Add(2)
@@ -66,7 +65,7 @@ func Execute(name string, arg ...string) error {
 	go asyncPrint(stderr)
 
 	if err := cmd.Wait(); err != nil {
-		fmt.Printf("Error waiting for command execution: %s......", err.Error())
+		fmt.Printf("Error waiting for command execution: %s......\n", err.Error())
 		return err
 	}
 	sg.Wait()
@@ -98,4 +97,24 @@ func YumCheck(name string) bool {
 	}
 	return processState.Success()
 
+}
+
+// 判断目录是否存在
+func PathExists(name string) bool {
+	_, err := os.Stat(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println(CSI + Blue + ">>create dir: " + name + End)
+			return false
+		}
+		return true
+	}
+	return true
+}
+
+func Mkdir(name string, perm os.FileMode) {
+	err := os.MkdirAll(name, perm)
+	if err != nil {
+		fmt.Println(CSI + Red + err.Error() + End)
+	}
 }
