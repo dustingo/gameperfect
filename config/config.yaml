@@ -1,29 +1,44 @@
 modeYum:
   - action: "install"
     name:
-    - ethtool
-    - tcpdump
+      - perl-XML-LibXML
+      - perl-XML-DOM
+      - perl-Switch
+      - ipmitool
+      - lrzsz
+      - traceroute
+      - sysstat
+      - psmisc
+      - bash-completion
+      - tcpdump
+      - mtr
+      - nmap-ncat
+      - tree
+      - screen
+      - ntp
 
 modeDir:
-  - action: "chown"
+  - action: chown
+    host: mhxzx_manager
     para: "mhxzx.mhxzx"
     path:
-    - /export/web
-  - ation: "chmod"
+      - /export/logs
+  - action: chmod
+    host: mhxzx_manager
     perm: 0600
     path:
-    - /export/web
+      - /dbhome/doumaoxin
 
 modeScripts:
-  - action: "run"
-    env: "python"
+  - action: run
+    host: all
+    env: python
     name:
-    - ./tools/sayhello.py
-  - action: "run"
-    env : "shell"
+      # 防火墙初始化
+      - ./tools/mhxzx_iptables_init.py
+  - action: run
+    host: mhxzx_manager
+    env : sh
     name:
-    - ./tools/kill.sh
-  - action: "run"
-    env: "golang"
-    name:
-      - ./tools/doubles
+      - ./tools/addcron.sh
+      - ./tools/checkIweb.sh

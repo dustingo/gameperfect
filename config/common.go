@@ -112,6 +112,7 @@ func PathExists(name string) bool {
 	return true
 }
 
+// Mkdir 创建目录
 func Mkdir(name string, perm os.FileMode) {
 	err := os.MkdirAll(name, perm)
 	if err != nil {

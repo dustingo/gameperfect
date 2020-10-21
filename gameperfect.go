@@ -4,13 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"gameperfect/config"
-	"os"
-	"time"
-
-	//ui "github.com/gizak/termui/v3"
-	//"github.com/gizak/termui/v3/widgets"
 	"gopkg.in/alecthomas/kingpin.v2"
-	//"log"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -25,10 +19,8 @@ var (
 	choseMod  = kingpin.Flag("mode", "chose witch mode you want to run,must use with --yaml").String()
 )
 var (
-	version = "1.0.0"
+	version = "1.0.1"
 )
-
-const mask = 0777
 
 func usage() {
 	fmt.Println(">>目录：config 存放yaml配置文件和第三方脚本配置")
@@ -36,11 +28,12 @@ func usage() {
 	fmt.Println(">>config.yaml: ")
 	fmt.Println("  >1.modeYum: action仅为'install'时，执行安装")
 	fmt.Println("  >2.modeDir: action为'chown'时，根据para [用户.属组],更改目录属性，不存在则创建; action为'chmod'时，根据perm[]执行更改目录|文件权限")
-	fmt.Println("  >3.modeScripts: action为'run'时，根据env [shell|python]和name [path + scripts_name]执行自定义脚本")
+	fmt.Println("  >3.modeScripts: action为'run'且匹配'hostname' 时，根据env [shell|python]和name [path + scripts_name]执行自定义脚本")
 	fmt.Println(config.CSI + config.Red + "ATTENTION！注意：" + config.End)
 	fmt.Println(config.CSI + config.Red + "the scripts should add 'x' permission" + config.End)
 	fmt.Println(config.CSI + config.Red + "如果scripts是在win编辑的，在linux下记得使用dos转换" + config.End)
 	fmt.Println(config.CSI + config.Red + "perm注意格式，如：0755 | 0600" + config.End)
+	fmt.Println(config.CSI + config.Red + "host匹配服务器hostname时，只在匹配的服务器执行，当host为'all' 或 host为 '' 空时，任何服务器都执行" + config.End)
 	fmt.Println(">>dns.yaml: ")
 	fmt.Println("  >1.https的完整url，执行https GET")
 	fmt.Println("  >2.域名，执行域名解析")
@@ -185,99 +178,16 @@ func showIpmi() {
 func doYamlAction() {
 	fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************Yaml Action********************")
 	yamlConfig := config.ParseYaml()
-	// 执行YUM
-	if *choseMod == "yum" {
-		if yamlConfig.ModeYum != nil {
-			fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "Found Mod: Yum")
-			for _, act := range yamlConfig.ModeYum {
-				if act.Action == "install" {
-					for i := 0; i < len(act.Name); i++ {
-						if config.YumCheck(act.Name[i]) {
-							fmt.Println(config.CSI + config.Blue + act.Name[i] + " already installed" + config.End)
-						} else {
-							fmt.Println(config.CSI + config.Blue + ">Do Install:" + act.Name[i] + config.End)
-							time.Sleep(time.Second * 1)
-							err := config.Execute("yum", "-y", "install", act.Name[i])
-							if err != nil {
-								fmt.Printf(config.CSI+config.Red+"%s"+"\n", err)
-							}
-						}
-
-					}
-
-				}
-			}
-		}
-		// 执行自定义脚本
-	} else if *choseMod == "scripts" {
-		if yamlConfig.ModeScripts != nil {
-			fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "Found Mod: Scripts")
-			for _, act := range yamlConfig.ModeScripts {
-				if act.Action == "run" {
-					if act.Env == "sh" || act.Env == "bash" {
-						for i := 0; i < len(act.Name); i++ {
-							fmt.Println(config.CSI + config.Blue + ">Run " + act.Name[i] + config.End)
-							err := config.Execute(act.Env, "-c", act.Name[i])
-							if err != nil {
-								fmt.Println(config.CSI + config.Red + err.Error() + config.End)
-								//return
-							}
-						}
-					} else if act.Env == "python" || act.Env == "Python" {
-						for i := 0; i < len(act.Name); i++ {
-							fmt.Println(config.CSI + config.Blue + ">Run " + act.Name[i] + config.End)
-							err := config.Execute(act.Env, act.Name[i])
-							if err != nil {
-								fmt.Println(config.CSI + config.Red + err.Error() + config.End)
-								//return
-							}
-
-						}
-					}
-				} else {
-					fmt.Println(config.CSI + config.Red + act.Action + " cant run" + config.End)
-				}
-			}
-		}
-		// 执行目录
+	if *choseMod == "" {
+		config.DoYumAction(yamlConfig)
+		config.DoDirAction(yamlConfig)
+		config.DoScriptAction(yamlConfig)
+	} else if *choseMod == "yum" {
+		config.DoYumAction(yamlConfig)
 	} else if *choseMod == "dir" {
-		fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************Dir Action********************")
-		if yamlConfig.ModeDir != nil {
-			fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "Found Mod: Dir")
-			for _, act := range yamlConfig.ModeDir {
-				if act.Action == "chown" {
-					for i := 0; i < len(act.Path); i++ {
-						fmt.Println(config.CSI + config.Blue + ">Do chown:" + act.Path[i] + config.End)
-						time.Sleep(time.Second)
-						if config.PathExists(act.Path[i]) {
-							err := config.Execute(act.Action, act.Para, act.Path[i])
-							if err != nil {
-								fmt.Printf(config.CSI+config.Red+"%s"+"\n", err)
-							}
-						} else {
-							config.Mkdir(act.Path[i], 0755)
-						}
-
-					}
-				} else if act.Action == "chmod" {
-					for i := 0; i < len(act.Path); i++ {
-						fmt.Println(config.CSI + config.Blue + ">Do chmod:" + act.Path[i] + config.End)
-						time.Sleep(time.Second)
-						if config.PathExists(act.Path[i]) {
-							fmt.Println(act.Perm)
-							//err := config.Execute(act.Action, act.Perm, act.Path[i])
-							err := os.Chmod(act.Path[i], act.Perm)
-							if err != nil {
-								fmt.Printf(config.CSI+config.Red+"%s"+"\n", err)
-							}
-						} else {
-							config.Mkdir(act.Path[i], act.Perm)
-						}
-
-					}
-				}
-			}
-		}
+		config.DoDirAction(yamlConfig)
+	} else if *choseMod == "scripts" {
+		config.DoScriptAction(yamlConfig)
 	} else {
 		fmt.Println(config.CSI + config.Red + "parameter err" + config.End)
 	}
