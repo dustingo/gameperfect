@@ -29,6 +29,7 @@ func usage() {
 	fmt.Println("  >1.modeYum: action仅为'install'时，执行安装")
 	fmt.Println("  >2.modeDir: action为'chown'时，根据para [用户.属组],更改目录属性，不存在则创建; action为'chmod'时，根据perm[]执行更改目录|文件权限")
 	fmt.Println("  >3.modeScripts: action为'run'且匹配'hostname' 时，根据env [shell|python]和name [path + scripts_name]执行自定义脚本")
+	fmt.Println(">4:modeService status 为active和inactive，active下面的服务都会被启动，且设置为开机启动，inactive下面的服务都设置为关闭，且开机不启动")
 	fmt.Println(config.CSI + config.Red + "ATTENTION！注意：" + config.End)
 	fmt.Println(config.CSI + config.Red + "the scripts should add 'x' permission" + config.End)
 	fmt.Println(config.CSI + config.Red + "如果scripts是在win编辑的，在linux下记得使用dos转换" + config.End)
@@ -182,12 +183,15 @@ func doYamlAction() {
 		config.DoYumAction(yamlConfig)
 		config.DoDirAction(yamlConfig)
 		config.DoScriptAction(yamlConfig)
+		config.DoServiceAction(yamlConfig)
 	} else if *choseMod == "yum" {
 		config.DoYumAction(yamlConfig)
 	} else if *choseMod == "dir" {
 		config.DoDirAction(yamlConfig)
 	} else if *choseMod == "scripts" {
 		config.DoScriptAction(yamlConfig)
+	} else if *choseMod == "services" {
+		config.DoServiceAction(yamlConfig)
 	} else {
 		fmt.Println(config.CSI + config.Red + "parameter err" + config.End)
 	}

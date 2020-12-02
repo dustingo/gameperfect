@@ -73,6 +73,23 @@ func Execute(name string, arg ...string) error {
 	return nil
 }
 
+//ExecuteResult
+func ExecuteResult(name string, arg ...string) (out string, err error) {
+	cmd := exec.Command(name, arg...)
+	stdout, _ := cmd.StdoutPipe()
+	//stderr, _ := cmd.StderrPipe()
+
+	if err := cmd.Start(); err != nil {
+		fmt.Printf("Error starting command: %s......\n", err.Error())
+		return "", err
+	}
+
+	reader := bufio.NewReader(stdout)
+	info, _, _ := reader.ReadLine()
+
+	return string(info), nil
+}
+
 // YumCheck 检查是否已安装
 func YumCheck(name string) bool {
 	env := os.Environ()

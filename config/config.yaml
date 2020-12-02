@@ -16,7 +16,13 @@ modeYum:
       - tree
       - screen
       - ntp
-
+modeService:
+  - status: inactive
+    name:
+      - NetworkManager.service
+  - status: active
+    name:
+      - ntpd.service
 modeDir:
   - action: chown
     host: mhxzx_manager

@@ -15,13 +15,16 @@ type YamlConfig struct {
 	ModeYum     []YumMode     `yaml:"modeYum"`
 	ModeDir     []DirMode     `yaml:"modeDir"`
 	ModeScripts []ScriptsMode `yaml:"modeScripts"`
+	ModeService []ServiceMode `yaml:"modeService"`
 }
 
+// YumMode yum结构体
 type YumMode struct {
 	Action string   `yaml:"action"`
 	Name   []string `yaml:"name"`
 }
 
+// DirMode 目录权限结构体
 type DirMode struct {
 	Action string      `yaml:"action"`
 	Para   string      `yaml:"para"`
@@ -30,11 +33,18 @@ type DirMode struct {
 	Host   string      `yaml:"host"`
 }
 
+// ScriptsMode 自定义脚本结构体
 type ScriptsMode struct {
 	Action string   `yaml:"action"`
 	Env    string   `yaml:"env"`
 	Name   []string `yaml:"name"`
 	Host   string   `yaml:"host"`
+}
+
+// ServiceMode 系统服务器结构体
+type ServiceMode struct {
+	Status string   `yaml:"status"`
+	Name   []string `yaml:"name"`
 }
 
 // ParseYaml 解析config.yaml
@@ -164,6 +174,70 @@ func DoDirAction(yamlConfig *YamlConfig) {
 					}
 				} else {
 					fmt.Println(CSI + Green + "[Info]" + "hostname not " + act.Host + " " + act.Action + " will not  run " + End)
+				}
+			}
+		}
+	}
+}
+
+// 执行config.yaml中的service
+func DoServiceAction(yamlConfig *YamlConfig) {
+	if yamlConfig.ModeService != nil {
+		fmt.Printf(CSI+Green+"%s"+End+"\n", "Found Mod: Service")
+	}
+	for _, act := range yamlConfig.ModeService {
+		if act.Status == "inactive" {
+			fmt.Println(CSI + Green + "******Service Need inactive******" + End)
+			for i := 0; i < len(act.Name); i++ {
+				res, err := ExecuteResult("systemctl", "is-active", act.Name[i])
+				if err != nil {
+					fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+					continue
+				}
+				if res == "active" {
+					fmt.Println(CSI + Red + ">Stop " + act.Name[i] + End)
+					err := Execute("systemctl", "stop", act.Name[i])
+					if err != nil {
+						fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+						continue
+					}
+					res, _ := ExecuteResult("systemctl", "is-active", act.Name[i])
+					fmt.Println(CSI + Blue + ">>Service " + act.Name[i] + ": " + res + End)
+					fmt.Println(CSI + Red + ">disable " + act.Name[i] + End)
+					err = Execute("systemctl", "disable", act.Name[i])
+					if err != nil {
+						fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+						continue
+					}
+
+				} else if res == "inactive" {
+					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + act.Status + End)
+				} else {
+					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + res + End)
+				}
+			}
+
+		} else if act.Status == "active" {
+			fmt.Println(CSI + Green + "******Service Need active******" + End)
+			for i := 0; i < len(act.Name); i++ {
+				res, err := ExecuteResult("systemctl", "is-active", act.Name[i])
+				if err != nil {
+					fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+					continue
+				}
+				if res == "active" {
+					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + "  active" + End)
+				} else if res == "inactive" {
+					fmt.Println(CSI + Red + ">Start " + act.Name[i] + End)
+					err := Execute("systemctl", "start", act.Name[i])
+					if err != nil {
+						fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+						continue
+					}
+					res, _ := ExecuteResult("systemctl", "is-active", act.Name[i])
+					fmt.Println(CSI + Blue + ">>Service " + act.Name[i] + ": " + res + End)
+				} else {
+					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + res + End)
 				}
 			}
 		}
