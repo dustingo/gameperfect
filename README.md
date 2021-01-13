@@ -20,6 +20,7 @@ Flags:
   >1.modeYum: action仅为'install'时，执行安装
   >2.modeDir: action为'chown'时，根据para [用户.属组],更改目录属性，不存在则创建; action为'chmod'时，根据perm[]执行更改目录|文件权限
   >3.modeScripts: action为'run'且匹配'hostname' 时，根据env [shell|python]和name [path + scripts_name]执行自定义脚本
+  >4.modeService: status为'inactive'时，此服务器将会被stop并且disable，当status为'active'时，服务将会被start且enable
 ATTENTION！注意：
 the scripts should add 'x' permission
 如果scripts是在win编辑的，在linux下记得使用dos转换

@@ -103,17 +103,17 @@ func showTimeZone() {
 }
 
 // 显示网卡信息 name,speed,ipaddress
-func showNet() {
-	fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************NET INFO********************")
-	netFace := config.NetFaceInfo{}
-	netFace.GetNetInfo()
-	Names := netFace.Name
-	Speeds := netFace.Speed
-	Ipaddresses := netFace.Ipaddress
-	for i := 0; i < len(Names); i++ {
-		fmt.Printf("\033[1;36;40m%s\033[0m %s \033[1;36;40m%s\033[0m %s \033[1;36;40m%s\033[0m %s \n", "Name:", Names[i], "Speed:", Speeds[i], "Ipaddress:", Ipaddresses[i])
-	}
-}
+//func showNet() {
+//	fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************NET INFO********************")
+//	netFace := config.NetFaceInfo{}
+//	netFace.GetNetInfo()
+//	Names := netFace.Name
+//	Speeds := netFace.Speed
+//	Ipaddresses := netFace.Ipaddress
+//	for i := 0; i < len(Names); i++ {
+//		fmt.Printf("\033[1;36;40m%s\033[0m %s \033[1;36;40m%s\033[0m %s \033[1;36;40m%s\033[0m %s \n", "Name:", Names[i], "Speed:", Speeds[i], "Ipaddress:", Ipaddresses[i])
+//	}
+//}
 
 // 显示硬盘信息
 func showDisk() {
@@ -170,10 +170,10 @@ func showIptables() {
 }
 
 // 显示ipmitool日志
-func showIpmi() {
-	fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************IPMI INFO********************")
-	config.GetIpmiInfo()
-}
+//func showIpmi() {
+//	fmt.Printf(config.CSI+config.Green+"%s"+config.End+"\n", "********************IPMI INFO********************")
+//	config.GetIpmiInfo()
+//}
 
 // 执行config.yaml
 func doYamlAction() {
@@ -202,13 +202,13 @@ func main() {
 		showSystem()
 		showCpu()
 		showTimeZone()
-		showNet()
+		//showNet()
 		showDisk()
 		showMem()
 		showNtp()
 		showIptables()
 		showDns()
-		showIpmi()
+		//showIpmi()
 	}
 	if *doYaml {
 		doYamlAction()
@@ -217,13 +217,13 @@ func main() {
 		showSystem()
 		showCpu()
 		showTimeZone()
-		showNet()
+		//showNet()
 		showDisk()
 		showMem()
 		showNtp()
 		showIptables()
 		showDns()
-		showIpmi()
+		//showIpmi()
 		doYamlAction()
 	}
 	if *doHelp {

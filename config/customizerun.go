@@ -213,7 +213,12 @@ func DoServiceAction(yamlConfig *YamlConfig) {
 				} else if res == "inactive" {
 					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + act.Status + End)
 				} else {
-					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + res + End)
+					fmt.Println(CSI + Blue + ">Service " + act.Name[i] + ": " + res + " but still do disbale action" + End)
+					err = Execute("systemctl", "disable", act.Name[i])
+					if err != nil {
+						fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+						continue
+					}
 				}
 			}
 
@@ -223,6 +228,11 @@ func DoServiceAction(yamlConfig *YamlConfig) {
 				res, err := ExecuteResult("systemctl", "is-active", act.Name[i])
 				if err != nil {
 					fmt.Println(CSI + Red + "[Error] " + err.Error() + End)
+					continue
+				}
+				res, err = ExecuteResult("systemctl", "enable", act.Name[i])
+				if err != nil {
+					fmt.Println(CSI + Red + "run enable [Error] " + err.Error() + End)
 					continue
 				}
 				if res == "active" {
